@@ -37,6 +37,7 @@ class LapTimer(Node):
         self.best_lap = float('inf')
         self.laps = []
         self.lap_max_v = 0.0
+        self.lap_min_v = float('inf')
 
     def on_odom(self, msg):
         x = msg.pose.pose.position.x
@@ -46,6 +47,8 @@ class LapTimer(Node):
         v = math.hypot(vx, vy)
         if v > self.lap_max_v:
             self.lap_max_v = v
+        if v < self.lap_min_v:
+            self.lap_min_v = v
         now = time.time()
 
         if self.start_x is None:
@@ -68,10 +71,11 @@ class LapTimer(Node):
                 if lap_time < MIN_LAP_TIME:
                     return  # ignore spurious
                 self.lap_num += 1
-                lap_v = self.lap_max_v
+                v_max = self.lap_max_v
+                v_min = self.lap_min_v if self.lap_min_v != float('inf') else 0.0
                 if self.lap_num == 1:
                     # First lap is warmup (car starts from rest, misaligned start point)
-                    print(f"[Warmup lap]  time: {lap_time:6.3f}s   v_max: {lap_v:4.2f} m/s   (not counted)")
+                    print(f"[Warmup lap]  time: {lap_time:6.3f}s   v_max: {v_max:4.2f}   v_min: {v_min:4.2f} m/s   (not counted)")
                 else:
                     counted_num = self.lap_num - 1
                     self.laps.append(lap_time)
@@ -81,9 +85,10 @@ class LapTimer(Node):
                     else:
                         tag = ''
                     avg = sum(self.laps) / len(self.laps)
-                    print(f"[lap {counted_num}]  time: {lap_time:6.3f}s   v_max: {lap_v:4.2f} m/s   best: {self.best_lap:6.3f}s   avg: {avg:6.3f}s{tag}")
+                    print(f"[lap {counted_num}]  time: {lap_time:6.3f}s   v_max: {v_max:4.2f}   v_min: {v_min:4.2f} m/s   best: {self.best_lap:6.3f}s   avg: {avg:6.3f}s{tag}")
                 self.lap_start_time = now
                 self.lap_max_v = 0.0
+                self.lap_min_v = float('inf')
                 self.state = 'waiting_to_leave'
 
 
