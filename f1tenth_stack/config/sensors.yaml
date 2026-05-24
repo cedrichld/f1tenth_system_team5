@@ -2,10 +2,11 @@ urg_node:
   ros__parameters:
     angle_max: 3.14
     angle_min: -3.14
-    ip_address: "192.168.0.10"
-    ip_port: 10940
-    # serial_port: "/dev/sensors/hokuyo"
+    # USB (UTM-30LX) — default. Uncomment ip_* and comment serial_port for the -EW Ethernet variant.
+    serial_port: "/dev/sensors/hokuyo"
     serial_baud: 115200
+    # ip_address: "192.168.0.10"
+    # ip_port: 10940
     laser_frame_id: "laser"
     calibrate_time: false
     default_user_latency: 0.0
